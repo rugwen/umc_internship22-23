@@ -26,7 +26,7 @@ red_patch = mpatches.Patch(color=nonresp_color, label='Non-responders')
 
 
 
-location = r"/data"
+location = r"(location)" # r"add file directory"
 
 files_to_scan = []
 for file in os.listdir(location):
@@ -57,6 +57,7 @@ for sample in names_of_patients:
     for file in files_to_scan:
         directory = location + r"/" + file
         data = pd.read_csv(directory, delimiter = ";")
+        data = data[data['part4'].str.contains('pro') & ~data['part4'].str.contains('unp|pop')]
         names = list(data.columns)[5:]
         for patient in list(data.columns)[5:]:
             print(patient)
@@ -100,24 +101,24 @@ for sample in names_of_patients:
             
             else:
                 pass
-
+#add a map named Filter_pro in the directory at the location
     if responsive:            
-        file_name = fr"data/{sample}_r_top{top}.xlsx"
+        file_name = fr"(location)+/Filter_pro/{sample}_r_top{top}.xlsx" # r"add file directory"
     elif responsive == False:
-        file_name = fr"data/{sample}_nr_top{top}.xlsx"
+        file_name = fr"(location)+/Filter_pro/{sample}_nr_top{top}.xlsx" # r"add file directory"
     curdf.to_excel(file_name) 
                 
 
 #%% Plotjes making
 #remove patient folder in topf 082 and 901/991
 
-normalize = True # zet op False als je niet genormalizeerde plotjes wil
+normalize = False # zet op False als je niet genormalizeerde plotjes wil
 
-location = r"data/"
+location = r"(location)/Filter_pro_top50/"# r"add file directory"
 
 resultsdf = pd.DataFrame(columns = ["Patient", "Responsive", "Cure", "Frequency"])
 
-topn = 1 #change based on interest e.g. top 0 or top 1
+topn = 0 #change based on interest e.g. top 0 or top 1
 cur_treatment = "c4"
 
 files_to_scan = []
@@ -145,14 +146,14 @@ for file in files_to_scan:
         resultsdf.loc[len(resultsdf)] = [patientname, responsive, "4", data.iloc[topn]['c4']/data.iloc[topn]['c1']]
     else:
         patientname = file.split("_")[0]
-        resultsdf.iloc[len(resultsdf)] = [patientname, responsive, "1", data.iloc[topn]['c1']] #this can also be changed based on your interest
-        resultsdf.iloc[len(resultsdf)] = [patientname, responsive, "2", data.iloc[topn]['c2']]
-        resultsdf.iloc[len(resultsdf)] = [patientname, responsive, "4", data.iloc[topn]['c4']]
+        resultsdf.loc[len(resultsdf)] = [patientname, responsive, "1", data.iloc[topn]['c1']] #this can also be changed based on your interest
+        resultsdf.loc[len(resultsdf)] = [patientname, responsive, "2", data.iloc[topn]['c2']]
+        resultsdf.loc[len(resultsdf)] = [patientname, responsive, "4", data.iloc[topn]['c4']]
         
 if normalize:
-    file_name = rf"data/top{topn}_c1_across_patients_norm.xlsx"
+    file_name = rf"(location)+/Filter_pro_data/top{topn}_c1_across_patients_norm.xlsx" # r"add file directory"
 else:
-    file_name = rf"data/top{topn}_c1_across_patients.xlsx"
+    file_name = rf"(location) + /Filter_pro_data/top"+{topn}+"_c1_across_patients.xlsx" # r"add file directory"
     
 resultsdf['Frequency'] = np.log2(resultsdf['Frequency']).fillna(0)
 resultsdf.replace([np.inf, -np.inf], np.nan, inplace=True)
@@ -163,10 +164,10 @@ sns.lineplot(x = 'Cure', y = 'Frequency', data=resultsdf, hue="Responsive", pale
 plt.legend(handles=[blue_patch, red_patch], loc = "best")
 plt.ylabel("log2 fold change relative to c1")
 if normalize: 
-    plt.savefig( fr"data/top{topn}_{cur_treatment}_dominant_clonotype_fig1_norm_log.png")
+    plt.savefig( fr"(location)+/Filter_pro_data/top{topn}_{cur_treatment}_dominant_clonotype_fig1_norm_log.png") # r"add file directory"
 else:
       plt.ylabel("Frequency %")
-      plt.savefig( fr"data/top{topn}_{cur_treatment}_dominant_clonotype_fig1.png")
+      plt.savefig( fr"(location)+/Filter_pro_top50/top"+{topn}+"_"+{cur_treatment}+"_dominant_clonotype_fig1.png") # r"add file directory"
 
 plt.show()
 plt.clf()
@@ -213,8 +214,8 @@ plt.xlabel("Cure")
     
 plt.show
 if normalize: 
-    plt.ylabel(f"log2 fold change relative to c1")
-    plt.savefig( fr"data/top{topn}_{cur_treatment}_dominant_clonotype_fig2_norm_change.svg")
-else: 
+    plt.ylabel("log2 fold change relative to c1")
+    plt.savefig( fr"(location) + Filter_pro_data/top{topn}_{cur_treatment}_dominant_clonotype_fig2_norm_change.svg") # r"add file directory"
+else:  
     plt.ylabel("Frequency %")
-    plt.savefig( fr"data/top{topn}_{cur_treatment}_dominant_clonotype_fig2.svg")
+    plt.savefig( fr"(location)+/Filter_pro_top50/top{topn}_{cur_treatment}_dominant_clonotype_fig2.svg") # r"add file directory"
